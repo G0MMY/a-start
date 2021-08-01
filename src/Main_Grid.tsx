@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useEffect } from "react";
 import aStart from "./algorithm";
 
-const start = 'pink'
+const start = 'orange'
 const end = 'blue'
-const wall = 'black'
+export const wall = 'black'
+export const len = 41
 
 export default function MainGrid(){
     const [grid, setGrid] = useState([[<></>]])
@@ -50,8 +51,18 @@ export default function MainGrid(){
         }
     }
 
+    const resetButton = ()=>{
+        grid.forEach((row)=>{
+            row.forEach((element)=>{
+                document.getElementById(element.props.id)!.style.backgroundColor = 'white'
+                start_pos.current = ''
+                end_pos.current = ''
+            })
+        })
+    }
+
     useEffect(()=>{
-        makeGrid(41)
+        makeGrid(len)
         const start_draw = document.getElementById('main_grid')!.addEventListener('mousedown', ()=>{
             wall_construction = true
         })
@@ -68,7 +79,12 @@ export default function MainGrid(){
             <button onClick={()=>{
                 aStart(start_pos.current, end_pos.current)
             }}>
-                click
+                find Path
+            </button>
+            <button onClick={()=>{
+                resetButton()
+            }}>
+                reset
             </button>
         </>
     )
