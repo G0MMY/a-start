@@ -12,23 +12,10 @@ interface Position{
 }
 
 export default class PriorityQueue{
-    element:Position = {
-        x: -1,
-        y: -1
-    }
-    priority:Prio = {
-        f_score: Infinity,
-        count: -1
-    }
-    queue:Queue[] = []
+    queue:Queue[]
 
-    constructor(element:Position, priority:Prio){
-        this.element = element
-        this.priority = priority
-        this.queue.push({
-            element: element,
-            priority: priority
-        })
+    constructor(){
+        this.queue = []
     }
 
     add(element:Position, priority:Prio){

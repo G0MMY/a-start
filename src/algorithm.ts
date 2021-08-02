@@ -1,13 +1,18 @@
-import { len, wall } from "./Main_Grid"
+import { len, wall, start } from "./MainGrid"
 import PriorityQueue from "./priorityQueue"
 
-const checked = 'red'
-const open = 'green'
+const checked = '#e64809'
+const open = '#e81e6f'
 const path = 'purple'
 
 interface Position{
     x:number,
     y:number
+}
+
+interface Visualizer{
+    element: Position
+    color: string
 }
 
 export default function aStart(start:string, end:string){
@@ -19,22 +24,27 @@ export default function aStart(start:string, end:string){
         x: parseInt(end.split(',')[0]), 
         y: parseInt(end.split(',')[1])
     }
+    let visualizer = [{
+        element:{x:start_pos.x, y:start_pos.y},
+        color:start
+    }]
     let count = 0
-    let open_set = new PriorityQueue(start_pos, {
+    let open_set = new PriorityQueue()
+    open_set.add(start_pos, {
         f_score: distance(start_pos, end_pos),
         count: count
     })
     let came_from:Position[][] = []
     for (let i=0;i<len;i++){
         came_from.push([])
-        for (let j=0;j<len;j++){
+        for (let j=0;j<len*2;j++){
             came_from[i].push({x:-1, y:-1})
         }
     }
     let g_score:number[][] = []
     for (let i=0;i<len;i++){
         g_score.push([])
-        for (let j=0;j<len;j++){
+        for (let j=0;j<len*2;j++){
             g_score[i].push(Infinity)
         }
     }
@@ -42,7 +52,7 @@ export default function aStart(start:string, end:string){
     let f_score:number[][] = []
     for (let i=0;i<len;i++){
         f_score.push([])
-        for (let j=0;j<len;j++){
+        for (let j=0;j<len*2;j++){
             f_score[i].push(Infinity)
         }
     }
@@ -56,7 +66,8 @@ export default function aStart(start:string, end:string){
         open_set_hash.splice(index, 1)
 
         if (current.x === end_pos.x && current.y === end_pos.y){
-            findPath(current, came_from)
+            findPath(current, came_from, visualizer)
+            play(visualizer)
             return true
         }
 
@@ -68,7 +79,7 @@ export default function aStart(start:string, end:string){
                 changed = true
                 came_from[neighbor.x][neighbor.y] = current
                 g_score[neighbor.x][neighbor.y] = temp_g_score
-                f_score[neighbor.x][neighbor.y] = distance(neighbor, end_pos)
+                f_score[neighbor.x][neighbor.y] = distance(neighbor, end_pos) + temp_g_score
                 if (open_set_hash.indexOf(neighbor) === -1){
                     count += 1
                     open_set.add(neighbor, {
@@ -76,11 +87,17 @@ export default function aStart(start:string, end:string){
                         count: count
                     })
                     open_set_hash.push(neighbor)
-                    document.getElementById(neighbor.x + ',' + neighbor.y)!.style.backgroundColor = open
+                    visualizer.push({
+                        element: neighbor,
+                        color: open
+                    })
                 }
             }
         })
-        document.getElementById(current.x + ',' + current.y)!.style.backgroundColor = checked
+        visualizer.push({
+            element: current,
+            color: checked
+        })
         if (!changed){
             open_set.remove()
         }
@@ -89,16 +106,30 @@ export default function aStart(start:string, end:string){
     return false
 }
 
-const findPath = (current:Position, came_from:Position[][]):boolean=>{
+const findPath = (current:Position, came_from:Position[][], visualizer: Visualizer[]):boolean=>{
     if (came_from[current.x][current.y].x === -1 && came_from[current.x][current.y].y === -1){
         return true
     }
-    document.getElementById(current.x + ',' + current.y)!.style.backgroundColor = path
-    return findPath(came_from[current.x][current.y], came_from)
+    visualizer.push({
+        element: current,
+        color: path
+    })
+    return findPath(came_from[current.x][current.y], came_from, visualizer)
+}
+
+const play = (visualizer: Visualizer[])=>{
+    let i = 0
+    visualizer.forEach((elem)=>{
+        i += 1
+        setTimeout(()=>{
+            document.getElementById(elem.element.x + ',' + elem.element.y)!.style.backgroundColor = elem.color
+        }, i * 4)
+    })
 }
 
 const neighbors = (current:Position)=>{
     let neighbors_array = []
+    
     if (current.x > 0){
         if (document.getElementById((current.x - 1) + ',' + current.y)!.style.backgroundColor !== wall){
             neighbors_array.push({
@@ -106,7 +137,7 @@ const neighbors = (current:Position)=>{
                 y: current.y
             })
         }
-    } if (current.x < 40){
+    } if (current.x < len - 1){
         if (document.getElementById((current.x + 1) + ',' + current.y)!.style.backgroundColor !== wall){
             neighbors_array.push({
                 x: current.x + 1, 
@@ -120,7 +151,7 @@ const neighbors = (current:Position)=>{
                 y: current.y - 1
             })
         }
-    } if (current.y < 40){
+    } if (current.y < len * 2 - 1){
         if (document.getElementById(current.x + ',' + (current.y + 1))!.style.backgroundColor !== wall){
             neighbors_array.push({
                 x: current.x, 

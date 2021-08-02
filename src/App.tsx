@@ -1,5 +1,5 @@
 import React from 'react';
-import MainGrid from './Main_Grid';
+import MainGrid from './MainGrid';
 
 function App() {
   return (
