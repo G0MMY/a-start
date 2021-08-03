@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import aStart from "./aStarAlgorithm";
 import { Button, FormControl, Select, InputLabel, MenuItem } from '@material-ui/core'
 import dijkstra from "./DijkstraAlgorithm";
+import greedyBestFirstSearch from "./greedyBestFirstSearch";
 
 export const start = 'orange'
 const end = 'blue'
@@ -80,6 +81,9 @@ export default function MainGrid(){
         })
         start_pos.current = ''
         end_pos.current = ''
+        const button = document.getElementById('visualize_button')!
+        button.style.backgroundColor = '#1976D2'
+        button.textContent = 'Visualize'
     }
 
     const clearButton = ()=>{
@@ -98,6 +102,27 @@ export default function MainGrid(){
                 })
             })
         })
+    }
+
+    const visualizeButton = ()=>{
+        if (start_pos.current !== '' && end_pos.current !== ''){
+            const button = document.getElementById('visualize_button')!
+            if (button.textContent === 'Visualize'){
+                if (algorithm === 'a_star'){
+                    aStart(start_pos.current, end_pos.current)
+                } else if (algorithm === 'dijkstra') {
+                    dijkstra(start_pos.current, end_pos.current)
+                } else if (algorithm === 'greedy'){
+                    greedyBestFirstSearch(start_pos.current, end_pos.current)
+                }
+                button.style.backgroundColor = '#DC004E'
+                button.textContent = 'Clear Visualization'
+            } else {
+                clearButton()
+                button.style.backgroundColor = '#1976D2'
+                button.textContent = 'Visualize'
+            }
+        }
     }
 
     const handleAlgorithmChange = (e:
@@ -121,32 +146,18 @@ export default function MainGrid(){
     },[])
 
     return (
-        <>
+        <div id='app'>
             <div id='header'>
                 <FormControl id="algorithm_form">
                     <InputLabel id="algorithm_selecter">Algorithm</InputLabel>
                     <Select labelId="algorithm_selecter" id="label" value={algorithm} onChange={(e)=>{handleAlgorithmChange(e)}}>
                         <MenuItem value="a_star">A star</MenuItem>
                         <MenuItem value="dijkstra">Dijkstra</MenuItem>
+                        <MenuItem value="greedy">Greedy Best-First Search</MenuItem>
                     </Select>
                 </FormControl>
                 <Button id='visualize_button' variant='contained' onClick={()=>{
-                    if (start_pos.current !== '' && end_pos.current !== ''){
-                        const button = document.getElementById('visualize_button')!
-                        if (button.textContent === 'Visualize'){
-                            if (algorithm === 'a_star'){
-                                aStart(start_pos.current, end_pos.current)
-                            } else {
-                                dijkstra(start_pos.current, end_pos.current)
-                            }
-                            button.style.backgroundColor = '#DC004E'
-                            button.textContent = 'Clear Visualization'
-                        } else {
-                            clearButton()
-                            button.style.backgroundColor = '#1976D2'
-                            button.textContent = 'Visualize'
-                        }
-                    }
+                    visualizeButton()
                 }}>
                     Visualize
                 </Button>
@@ -159,6 +170,6 @@ export default function MainGrid(){
                     {grid}
                 </tbody>
             </table>
-        </>
+        </div>
     )
 }

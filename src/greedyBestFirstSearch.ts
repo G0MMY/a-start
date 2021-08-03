@@ -1,8 +1,8 @@
 import { len } from "./MainGrid"
 import PriorityQueue from "./priorityQueue"
-import { findPath, play, neighbors, Position, checked, open, positionFormat } from "./algorithmUtils"
+import { findPath, play, neighbors, distance, Position, checked, open, positionFormat } from "./algorithmUtils"
 
-export default function dijkstra(start:string, end:string){
+export default function greedyBestFirstSearch(start:string, end:string){
     const start_pos = positionFormat(start)
     const end_pos = positionFormat(end)
     let visualizer = [{
@@ -10,6 +10,11 @@ export default function dijkstra(start:string, end:string){
         color:start
     }]
     let count = 0
+    let open_set = new PriorityQueue()
+    open_set.add(start_pos, {
+        f_score: distance(start_pos, end_pos),
+        count: count
+    })
     let came_from:Position[][] = []
     for (let i=0;i<len;i++){
         came_from.push([])
@@ -17,28 +22,22 @@ export default function dijkstra(start:string, end:string){
             came_from[i].push({x:-1, y:-1})
         }
     }
-    let g_score:number[][] = []
+    let f_score:number[][] = []
     for (let i=0;i<len;i++){
-        g_score.push([])
+        f_score.push([])
         for (let j=0;j<len*2;j++){
-            g_score[i].push(Infinity)
+            f_score[i].push(Infinity)
         }
     }
-    g_score[start_pos.x][start_pos.y] = 0
-    let open_set = new PriorityQueue()
-    open_set.add(start_pos, {
-        f_score: count,
-        count: count
-    })
+    f_score[start_pos.x][start_pos.y] = distance(start_pos, end_pos)
     let open_set_hash = [start_pos]
 
-    let i=0
     while (!open_set.isEmpty()){
+        let changed = false
         let current = open_set.front().element
         const index = open_set_hash.indexOf(current)
         open_set_hash.splice(index, 1)
-        
-        
+
         if (current.x === end_pos.x && current.y === end_pos.y){
             findPath(current, came_from, visualizer)
             play(visualizer)
@@ -47,15 +46,16 @@ export default function dijkstra(start:string, end:string){
 
         const neighbors_array = neighbors(current)
         neighbors_array.forEach((neighbor)=>{
-            const temp_g_score = g_score[current.x][current.y] + 1
+            const temp_f_score = distance(neighbor, end_pos)
 
-            if (temp_g_score < g_score[neighbor.x][neighbor.y]){
+            if (temp_f_score < f_score[neighbor.x][neighbor.y]){
+                changed = true
                 came_from[neighbor.x][neighbor.y] = current
-                g_score[neighbor.x][neighbor.y] = g_score[current.x][current.y] + 1
+                f_score[neighbor.x][neighbor.y] = temp_f_score
                 if (open_set_hash.indexOf(neighbor) === -1){
                     count += 1
                     open_set.add(neighbor, {
-                        f_score: count,
+                        f_score: f_score[neighbor.x][neighbor.y],
                         count: count
                     })
                     open_set_hash.push(neighbor)
@@ -70,8 +70,11 @@ export default function dijkstra(start:string, end:string){
             element: current,
             color: checked
         })
-        open_set.remove()
+        if (!changed){
+            open_set.remove()
+        }
     }
 
     return false
+
 }
