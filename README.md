@@ -6,18 +6,18 @@ I did this project mainly to learn about path finding algorithm and to get bette
 
 ## How does it work 
 
-![ScreenShot](images/ui.png)
+![GitHub Logo](images/ui.png)
 
 It's quite simple, click where u want the start (orange) and then end (blue). Then, put some walls by draging your mouse while the left button is pressed on the grid. You can also change the algorithm for the visualization. 
 
 
-![ScreenShot](images/before.png)
+![GitHub Logo](images/before.png)
 
 
 After, press on visualize to see the algorithm in action.
 
 
-![ScreenShot](images/visualization.png)
+![GitHub Logo](images/visualization.png)
 
 
 To reset the visualization without clearing the walls and the start and end position, press clear visualization. To clear everything, press reset.
