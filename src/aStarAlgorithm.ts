@@ -1,29 +1,10 @@
-import { len, wall, start } from "./MainGrid"
+import { len } from "./MainGrid"
 import PriorityQueue from "./priorityQueue"
-
-const checked = '#e64809'
-const open = '#e81e6f'
-const path = 'purple'
-
-interface Position{
-    x:number,
-    y:number
-}
-
-interface Visualizer{
-    element: Position
-    color: string
-}
+import { findPath, play, neighbors, distance, Position, checked, open, positionFormat } from "./algorithmUtils"
 
 export default function aStart(start:string, end:string){
-    const start_pos = {
-        x: parseInt(start.split(',')[0]), 
-        y: parseInt(start.split(',')[1])
-    }
-    const end_pos = {
-        x: parseInt(end.split(',')[0]), 
-        y: parseInt(end.split(',')[1])
-    }
+    const start_pos = positionFormat(start)
+    const end_pos = positionFormat(end)
     let visualizer = [{
         element:{x:start_pos.x, y:start_pos.y},
         color:start
@@ -106,63 +87,3 @@ export default function aStart(start:string, end:string){
     return false
 }
 
-const findPath = (current:Position, came_from:Position[][], visualizer: Visualizer[]):boolean=>{
-    if (came_from[current.x][current.y].x === -1 && came_from[current.x][current.y].y === -1){
-        return true
-    }
-    visualizer.push({
-        element: current,
-        color: path
-    })
-    return findPath(came_from[current.x][current.y], came_from, visualizer)
-}
-
-const play = (visualizer: Visualizer[])=>{
-    let i = 0
-    visualizer.forEach((elem)=>{
-        i += 1
-        setTimeout(()=>{
-            document.getElementById(elem.element.x + ',' + elem.element.y)!.style.backgroundColor = elem.color
-        }, i * 4)
-    })
-}
-
-const neighbors = (current:Position)=>{
-    let neighbors_array = []
-    
-    if (current.x > 0){
-        if (document.getElementById((current.x - 1) + ',' + current.y)!.style.backgroundColor !== wall){
-            neighbors_array.push({
-                x: current.x - 1, 
-                y: current.y
-            })
-        }
-    } if (current.x < len - 1){
-        if (document.getElementById((current.x + 1) + ',' + current.y)!.style.backgroundColor !== wall){
-            neighbors_array.push({
-                x: current.x + 1, 
-                y: current.y
-            })
-        }
-    } if (current.y > 0){
-        if (document.getElementById(current.x + ',' + (current.y - 1))!.style.backgroundColor !== wall){
-            neighbors_array.push({
-                x: current.x, 
-                y: current.y - 1
-            })
-        }
-    } if (current.y < len * 2 - 1){
-        if (document.getElementById(current.x + ',' + (current.y + 1))!.style.backgroundColor !== wall){
-            neighbors_array.push({
-                x: current.x, 
-                y: current.y + 1
-            })
-        }
-    }
-
-    return neighbors_array
-}
-
-const distance = (current:Position, end:Position)=>{
-    return Math.abs(current.x - end.x) + Math.abs(current.y - end.y)
-}

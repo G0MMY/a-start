@@ -2,8 +2,9 @@ import React from "react";
 import { useRef } from "react";
 import { useState } from "react";
 import { useEffect } from "react";
-import aStart from "./algorithm";
-import { Button } from '@material-ui/core'
+import aStart from "./aStarAlgorithm";
+import { Button, FormControl, Select, InputLabel, MenuItem } from '@material-ui/core'
+import dijkstra from "./DijkstraAlgorithm";
 
 export const start = 'orange'
 const end = 'blue'
@@ -14,7 +15,8 @@ export default function MainGrid(){
     const [grid, setGrid] = useState([[<tr key='initial'></tr>]])
     const start_pos = useRef('')
     const end_pos = useRef('')
-    let wall_construction = false
+    const wall_construction = useRef(false)
+    const [algorithm, setAlgorithm] = useState('a_star')
 
     const makeRow = (length: number, row_number:number)=>{
         let row = []
@@ -40,7 +42,7 @@ export default function MainGrid(){
     }
 
     const makeWall = (id:string)=>{
-        if (wall_construction){
+        if (wall_construction.current){
             if (document.getElementById(id) !== null){
                 document.getElementById(id)!.style.backgroundColor = wall
             }
@@ -57,6 +59,11 @@ export default function MainGrid(){
                 doc.style.backgroundColor = end
                 end_pos.current = id
             } else {
+                if (id === start_pos.current){
+                    start_pos.current = ''
+                } else if (id === end_pos.current){
+                    end_pos.current = ''
+                }
                 doc.style.backgroundColor = 'white'
             }
         }
@@ -75,34 +82,76 @@ export default function MainGrid(){
         end_pos.current = ''
     }
 
+    const clearButton = ()=>{
+        grid.forEach((row)=>{
+            row.forEach((element)=>{
+                const children:JSX.Element[] = element.props.children
+                children.forEach((child)=>{
+                    const doc = document.getElementById(child.props.id)!
+                    if (child.props.id === start_pos.current){
+                        doc.style.backgroundColor = start
+                    } else if (child.props.id === end_pos.current){
+                        doc.style.backgroundColor = end
+                    } else if (doc.style.backgroundColor !== wall){
+                        doc.style.backgroundColor = 'white'
+                    }
+                })
+            })
+        })
+    }
+
+    const handleAlgorithmChange = (e:
+        React.ChangeEvent<{
+        name?: string | undefined;
+        value: unknown;
+    }>)=>{
+        if (typeof(e.target.value)==='string'){
+            setAlgorithm(e.target.value)
+        }
+    }
+
     useEffect(()=>{
         makeTable(len)
         document.getElementById('main_grid')!.addEventListener('mousedown', ()=>{
-            wall_construction = true
+            wall_construction.current = true
         })
         document.getElementById('main_grid')!.addEventListener('mouseup', ()=>{
-            wall_construction = false
+            wall_construction.current = false
         })
     },[])
 
     return (
         <>
             <div id='header'>
+                <FormControl id="algorithm_form">
+                    <InputLabel id="algorithm_selecter">Algorithm</InputLabel>
+                    <Select labelId="algorithm_selecter" id="label" value={algorithm} onChange={(e)=>{handleAlgorithmChange(e)}}>
+                        <MenuItem value="a_star">A star</MenuItem>
+                        <MenuItem value="dijkstra">Dijkstra</MenuItem>
+                    </Select>
+                </FormControl>
                 <Button id='visualize_button' variant='contained' onClick={()=>{
                     if (start_pos.current !== '' && end_pos.current !== ''){
                         const button = document.getElementById('visualize_button')!
                         if (button.textContent === 'Visualize'){
-                            aStart(start_pos.current, end_pos.current)
+                            if (algorithm === 'a_star'){
+                                aStart(start_pos.current, end_pos.current)
+                            } else {
+                                dijkstra(start_pos.current, end_pos.current)
+                            }
                             button.style.backgroundColor = '#DC004E'
-                            button.textContent = 'Clear'
+                            button.textContent = 'Clear Visualization'
                         } else {
-                            resetButton()
+                            clearButton()
                             button.style.backgroundColor = '#1976D2'
                             button.textContent = 'Visualize'
                         }
                     }
                 }}>
                     Visualize
+                </Button>
+                <Button id='reset_button' variant='contained' color='secondary' onClick={()=>{resetButton()}}>
+                    Reset
                 </Button>
             </div>
             <table id='main_grid' >
