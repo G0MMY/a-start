@@ -24,46 +24,70 @@ export const findPath = (current:Position, came_from:Position[][], visualizer: V
     return findPath(came_from[current.x][current.y], came_from, visualizer)
 }
 
-export const play = (visualizer: Visualizer[])=>{
+export const play = (visualizer: Visualizer[], grid_number:string)=>{
     let i = 0
     document.getElementById('app')!.style.pointerEvents = 'none'
     visualizer.forEach((elem)=>{
         i += 1
         setTimeout(()=>{
-            document.getElementById(elem.element.x + ',' + elem.element.y)!.style.backgroundColor = elem.color
+            document.getElementById(elem.element.x + ',' + elem.element.y + ' ' + grid_number)!.style.backgroundColor = elem.color
         }, i * 4)
     })
+    const doc = document.getElementById('screen_pointers')!
+    if (grid_number === '1' || grid_number === '2'){
+        if (doc.textContent === null){
+            doc.textContent = JSON.stringify(i)
+        } else if (doc.textContent === '' || i > parseInt(doc.textContent)){
+            doc.textContent = JSON.stringify(i)
+        }
+    }
+  
     setTimeout(()=>{
-        document.getElementById('app')!.style.pointerEvents = 'auto'
+        if (grid_number === '1' || grid_number === '2'){
+            if (doc.textContent !== null && i === parseInt(doc.textContent)){
+                document.getElementById('app')!.style.pointerEvents = 'auto'
+                doc.textContent = '0'
+            }
+        } else {
+            document.getElementById('app')!.style.pointerEvents = 'auto'
+        }
+        
     }, i * 4)
 }
 
-export const neighbors = (current:Position)=>{
+export const neighbors = (current:Position, grid_number:string)=>{
     let neighbors_array = []
     
     if (current.x > 0){
-        if (document.getElementById((current.x - 1) + ',' + current.y)!.style.backgroundColor !== wall){
+        if (document.getElementById((current.x - 1) + ',' + current.y + ' ' + grid_number)!.style.backgroundColor !== wall){
             neighbors_array.push({
                 x: current.x - 1, 
                 y: current.y
             })
         }
     } if (current.x < len - 1){
-        if (document.getElementById((current.x + 1) + ',' + current.y)!.style.backgroundColor !== wall){
+        if (document.getElementById((current.x + 1) + ',' + current.y + ' ' + grid_number)!.style.backgroundColor !== wall){
             neighbors_array.push({
                 x: current.x + 1, 
                 y: current.y
             })
         }
     } if (current.y > 0){
-        if (document.getElementById(current.x + ',' + (current.y - 1))!.style.backgroundColor !== wall){
+        if (document.getElementById(current.x + ',' + (current.y - 1) + ' ' + grid_number)!.style.backgroundColor !== wall){
             neighbors_array.push({
                 x: current.x, 
                 y: current.y - 1
             })
         }
-    } if (current.y < len * 2 - 1){
-        if (document.getElementById(current.x + ',' + (current.y + 1))!.style.backgroundColor !== wall){
+    } if (current.y < len * 2 - 1 && grid_number === ''){
+        if (document.getElementById(current.x + ',' + (current.y + 1) + ' ')!.style.backgroundColor !== wall){
+            neighbors_array.push({
+                x: current.x, 
+                y: current.y + 1
+            })
+        }
+    } if (current.y < len - 1 && grid_number !== ''){
+        if (document.getElementById(current.x + ',' + (current.y + 1) + ' ' + grid_number)!.style.backgroundColor !== wall){
             neighbors_array.push({
                 x: current.x, 
                 y: current.y + 1
@@ -77,7 +101,6 @@ export const neighbors = (current:Position)=>{
 export const distance = (current:Position, end:Position)=>{
     return Math.abs(current.x - end.x) + Math.abs(current.y - end.y)
 }
-
 
 export const positionFormat = (position:string)=>{
     return {

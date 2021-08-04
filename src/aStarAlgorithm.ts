@@ -2,7 +2,7 @@ import { len } from "./MainGrid"
 import PriorityQueue from "./priorityQueue"
 import { findPath, play, neighbors, distance, Position, checked, open, positionFormat } from "./algorithmUtils"
 
-export default function aStart(start:string, end:string){
+export default function aStar(start:string, end:string, grid_number:string){
     const start_pos = positionFormat(start)
     const end_pos = positionFormat(end)
     let visualizer = [{
@@ -48,11 +48,11 @@ export default function aStart(start:string, end:string){
 
         if (current.x === end_pos.x && current.y === end_pos.y){
             findPath(current, came_from, visualizer)
-            play(visualizer)
-            return true
+            play(visualizer, grid_number)
+            return play(visualizer, grid_number)
         }
 
-        const neighbors_array = neighbors(current)
+        const neighbors_array = neighbors(current, grid_number)
         neighbors_array.forEach((neighbor)=>{
             const temp_g_score = g_score[current.x][current.y] + 1
 

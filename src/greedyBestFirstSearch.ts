@@ -2,7 +2,7 @@ import { len } from "./MainGrid"
 import PriorityQueue from "./priorityQueue"
 import { findPath, play, neighbors, distance, Position, checked, open, positionFormat } from "./algorithmUtils"
 
-export default function greedyBestFirstSearch(start:string, end:string){
+export default function greedyBestFirstSearch(start:string, end:string, grid_number:string){
     const start_pos = positionFormat(start)
     const end_pos = positionFormat(end)
     let visualizer = [{
@@ -40,11 +40,11 @@ export default function greedyBestFirstSearch(start:string, end:string){
 
         if (current.x === end_pos.x && current.y === end_pos.y){
             findPath(current, came_from, visualizer)
-            play(visualizer)
+            play(visualizer, grid_number)
             return true
         }
 
-        const neighbors_array = neighbors(current)
+        const neighbors_array = neighbors(current, grid_number)
         neighbors_array.forEach((neighbor)=>{
             const temp_f_score = distance(neighbor, end_pos)
 

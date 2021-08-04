@@ -1,19 +1,23 @@
-import React from "react";
-import { useRef } from "react";
-import { useState } from "react";
-import { useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import aStart from "./aStarAlgorithm";
 import { Button, FormControl, Select, InputLabel, MenuItem } from '@material-ui/core'
 import dijkstra from "./DijkstraAlgorithm";
 import greedyBestFirstSearch from "./greedyBestFirstSearch";
+import Grid from './Grid'
+import { History } from "history";
+
 
 export const start = 'orange'
-const end = 'blue'
+export const end = 'blue'
 export const wall = 'black'
 export const len = 35
 
-export default function MainGrid(){
-    const [grid, setGrid] = useState([[<tr key='initial'></tr>]])
+interface Props{
+    history: History
+}
+
+export default function MainGrid(props: Props){
+    const [grid, setGrid] = useState([<tr key='initial'></tr>])
     const start_pos = useRef('')
     const end_pos = useRef('')
     const wall_construction = useRef(false)
@@ -22,22 +26,20 @@ export default function MainGrid(){
     const makeRow = (length: number, row_number:number)=>{
         let row = []
         for (let i=0;i<length;i++){
-            row.push(<td className='square' key={row_number + ',' + i} id={row_number + ',' + i} onMouseEnter={()=>{
-                makeWall(row_number + ',' + i)
+            row.push(<td className='square' key={row_number + ',' + i + ' '} id={row_number + ',' + i + ' '} onMouseEnter={()=>{
+                makeWall(row_number + ',' + i + ' ')
             }} onClick={()=>{
-                squareClick(row_number + ',' + i)
+                squareClick(row_number + ',' + i + ' ')
             }}></td>)
         }
 
         return row
     }
 
-
     const makeTable = (length: number)=>{
-        let table:JSX.Element[][] = []
+        let table:JSX.Element[] = []
         for (let i=0;i<length;i++){
-            table.push([])
-            table[i].push(<tr key={'tr ' + i}>{makeRow(length*2, i)}</tr>)
+            table.push(<tr key={'tr ' + i}>{makeRow(length*2, i)}</tr>)
         }
         setGrid(table)
     }
@@ -72,11 +74,9 @@ export default function MainGrid(){
 
     const resetButton = ()=>{
         grid.forEach((row)=>{
-            row.forEach((element)=>{
-                const children:JSX.Element[] = element.props.children
-                children.forEach((child)=>{
-                    document.getElementById(child.props.id)!.style.backgroundColor = 'white'
-                })
+            const children:JSX.Element[] = row.props.children
+            children.forEach((child)=>{
+                document.getElementById(child.props.id)!.style.backgroundColor = 'white'
             })
         })
         start_pos.current = ''
@@ -88,18 +88,16 @@ export default function MainGrid(){
 
     const clearButton = ()=>{
         grid.forEach((row)=>{
-            row.forEach((element)=>{
-                const children:JSX.Element[] = element.props.children
-                children.forEach((child)=>{
-                    const doc = document.getElementById(child.props.id)!
-                    if (child.props.id === start_pos.current){
-                        doc.style.backgroundColor = start
-                    } else if (child.props.id === end_pos.current){
-                        doc.style.backgroundColor = end
-                    } else if (doc.style.backgroundColor !== wall){
-                        doc.style.backgroundColor = 'white'
-                    }
-                })
+            const children:JSX.Element[] = row.props.children
+            children.forEach((child)=>{
+                const doc = document.getElementById(child.props.id)!
+                if (child.props.id === start_pos.current){
+                    doc.style.backgroundColor = start
+                } else if (child.props.id === end_pos.current){
+                    doc.style.backgroundColor = end
+                } else if (doc.style.backgroundColor !== wall){
+                    doc.style.backgroundColor = 'white'
+                }
             })
         })
     }
@@ -109,11 +107,11 @@ export default function MainGrid(){
             const button = document.getElementById('visualize_button')!
             if (button.textContent === 'Visualize'){
                 if (algorithm === 'a_star'){
-                    aStart(start_pos.current, end_pos.current)
+                    aStart(start_pos.current, end_pos.current, '')
                 } else if (algorithm === 'dijkstra') {
-                    dijkstra(start_pos.current, end_pos.current)
+                    dijkstra(start_pos.current, end_pos.current, '')
                 } else if (algorithm === 'greedy'){
-                    greedyBestFirstSearch(start_pos.current, end_pos.current)
+                    greedyBestFirstSearch(start_pos.current, end_pos.current, '')
                 }
                 button.style.backgroundColor = '#DC004E'
                 button.textContent = 'Clear Visualization'
@@ -123,6 +121,10 @@ export default function MainGrid(){
                 button.textContent = 'Visualize'
             }
         }
+    }
+
+    const compareButton = ()=>{
+        props.history.push('/compare')
     }
 
     const handleAlgorithmChange = (e:
@@ -150,7 +152,8 @@ export default function MainGrid(){
             <div id='header'>
                 <FormControl id="algorithm_form">
                     <InputLabel id="algorithm_selecter">Algorithm</InputLabel>
-                    <Select labelId="algorithm_selecter" id="label" value={algorithm} onChange={(e)=>{handleAlgorithmChange(e)}}>
+                    <Select labelId="algorithm_selecter" id="label" value={algorithm} style={
+                        algorithm === 'greedy' ? {fontSize:'12px'}:{fontSize:'15px'}} onChange={(e)=>{handleAlgorithmChange(e)}}>
                         <MenuItem value="a_star">A star</MenuItem>
                         <MenuItem value="dijkstra">Dijkstra</MenuItem>
                         <MenuItem value="greedy">Greedy Best-First Search</MenuItem>
@@ -164,12 +167,11 @@ export default function MainGrid(){
                 <Button id='reset_button' variant='contained' color='secondary' onClick={()=>{resetButton()}}>
                     Reset
                 </Button>
+                <Button id='compare_button' variant='contained' onClick={()=>{compareButton()}}>
+                    Compare Algorithms
+                </Button>
             </div>
-            <table id='main_grid' >
-                <tbody>
-                    {grid}
-                </tbody>
-            </table>
+            <Grid grid={grid} id='main_grid'/>
         </div>
     )
 }

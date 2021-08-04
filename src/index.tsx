@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import MainGrid from './MainGrid';
+import App from './App';
 
 ReactDOM.render(
-  <MainGrid/>,
+  <App/>,
   document.getElementById('root')
 );
 

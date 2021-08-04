@@ -2,7 +2,7 @@ import { len } from "./MainGrid"
 import PriorityQueue from "./priorityQueue"
 import { findPath, play, neighbors, Position, checked, open, positionFormat } from "./algorithmUtils"
 
-export default function dijkstra(start:string, end:string){
+export default function dijkstra(start:string, end:string, grid_number:string){
     const start_pos = positionFormat(start)
     const end_pos = positionFormat(end)
     let visualizer = [{
@@ -27,7 +27,7 @@ export default function dijkstra(start:string, end:string){
     g_score[start_pos.x][start_pos.y] = 0
     let open_set = new PriorityQueue()
     open_set.add(start_pos, {
-        f_score: count,
+        f_score: g_score[start_pos.x][start_pos.y],
         count: count
     })
     let open_set_hash = [start_pos]
@@ -41,11 +41,11 @@ export default function dijkstra(start:string, end:string){
         
         if (current.x === end_pos.x && current.y === end_pos.y){
             findPath(current, came_from, visualizer)
-            play(visualizer)
+            play(visualizer, grid_number)
             return true
         }
 
-        const neighbors_array = neighbors(current)
+        const neighbors_array = neighbors(current, grid_number)
         neighbors_array.forEach((neighbor)=>{
             const temp_g_score = g_score[current.x][current.y] + 1
 
@@ -55,7 +55,7 @@ export default function dijkstra(start:string, end:string){
                 if (open_set_hash.indexOf(neighbor) === -1){
                     count += 1
                     open_set.add(neighbor, {
-                        f_score: count,
+                        f_score: g_score[neighbor.x][neighbor.y],
                         count: count
                     })
                     open_set_hash.push(neighbor)
