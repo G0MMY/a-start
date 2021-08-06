@@ -32,7 +32,6 @@ export default function dijkstra(start:string, end:string, grid_number:string){
     })
     let open_set_hash = [start_pos]
 
-    let i=0
     while (!open_set.isEmpty()){
         let current = open_set.front().element
         const index = open_set_hash.indexOf(current)
